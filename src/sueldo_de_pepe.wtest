@@ -1,0 +1,87 @@
+import sueldo_de_pepe.*
+
+describe "Sueldo de Pepe" {
+	
+	method configurarAPepe(categoria, bonoPorPresentismo, bonoPorResultados) {
+		pepe.categoria(categoria)
+		pepe.bonoPorPresentismo(bonoPorPresentismo)
+		pepe.bonoPorResultados(bonoPorResultados)
+	}
+	
+	method configurarAPepe(categoria, bonoPorPresentismo, bonoPorResultados, faltas) {
+		self.configurarAPepe(categoria, bonoPorPresentismo, bonoPorResultados)
+		pepe.cantidadFaltas(faltas)
+	}
+	
+	
+	test "Pepe sin bono por presentismo ni resultados y 15 faltas tiene el neto de la categoria" {
+		self.configurarAPepe(cadete, bonoNulo, bonoNulo, 15)
+		assert.equals(cadete.neto(), pepe.sueldo())
+	}
+	
+	test "Pepe con 15 faltas y bono por presentismo cobra el neto de la categoria" {
+		self.configurarAPepe(cadete, bonoPresentismo, bonoNulo, 15)
+		assert.equals(cadete.neto(), pepe.sueldo())
+	}
+	
+	test "Pepe con 1 faltas y bono por presentismo cobra el neto mas 50" {
+		self.configurarAPepe(cadete, bonoPresentismo, bonoNulo, 1)
+		assert.equals(cadete.neto() + 50, pepe.sueldo())
+	}
+	
+	test "Pepe con 0 faltas y bono por presentismo cobra el neto mas 100" {
+		self.configurarAPepe(cadete, bonoPresentismo, bonoNulo, 0)
+		assert.equals(cadete.neto() + 100, pepe.sueldo())
+	}
+	
+	test "Pepe como gerente y bono de porcentaje sobre neto tiene un sueldo de 1100" {
+		self.configurarAPepe(gerente, bonoNulo, bonoPorcentajeSobreNeto)
+		assert.equals(1100, pepe.sueldo())
+	}
+}
+
+describe "Bonos por presentismo" {
+	
+	method crearEmpleado(cantidadFaltas) = object {
+			method cantidadFaltas() = cantidadFaltas
+		}
+	
+	test "Bono por presentismo con un empleado sin faltas vale 100" {
+		assert.equals(100, bonoPresentismo.importe(self.crearEmpleado(0)))
+	}
+	
+	test "Bono por presentismo con un empleado una falta vale 50" {
+		assert.equals(50, bonoPresentismo.importe(self.crearEmpleado(1)))
+	}
+
+	test "Bono por presentismo con un empleado mas de una falta vale 0" {
+		assert.equals(0, bonoPresentismo.importe(self.crearEmpleado(2)))
+	}
+}
+
+describe "Bonos por resultado" {
+	
+	method crearEmpleado(neto) = object {
+			method neto() = neto
+		}
+	
+	test "Bono por resultado de porcentaje sobre neto con un empleado con neto de 100 vale 10" {
+		assert.equals(10, bonoPorcentajeSobreNeto.importe(self.crearEmpleado(100)))
+	}
+	
+	test "Bono por resultado fijo con un empleado una falta vale 80" {
+		assert.equals(80, bonoFijo.importe(self.crearEmpleado(100)))
+	}
+}
+
+describe "Bono nulo" {
+	
+	test "El bono nulo con un empleado cualquier devuelve un importe 0" {
+		assert.equals(0, bonoNulo.importe(object {}))
+	}
+}
+
+
+
+
+
